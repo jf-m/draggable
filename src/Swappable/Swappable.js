@@ -25,6 +25,11 @@ const defaultAnnouncements = {
   'swappabled:swapped': onSwappableSwappedDefaultAnnouncement,
 };
 
+
+export const defaultSwappableOptions = {
+  immediateSwap: true
+};
+
 /**
  * Swappable is built on top of Draggable and allows swapping of draggable elements.
  * Order is irrelevant to Swappable.
@@ -41,6 +46,7 @@ export default class Swappable extends Draggable {
    */
   constructor(containers = [], options = {}) {
     super(containers, {
+      ...defaultSwappableOptions,
       ...options,
       announcements: {
         ...defaultAnnouncements,
@@ -113,19 +119,23 @@ export default class Swappable extends Draggable {
     if (swappableSwapEvent.canceled()) {
       return;
     }
+    if (this.options.immediateSwap === true) {
+      // swap originally swapped element back
+      if (this.lastOver && this.lastOver !== event.over) {
+        swap(this.lastOver, event.source);
+      }
 
-    // swap originally swapped element back
-    if (this.lastOver && this.lastOver !== event.over) {
-      swap(this.lastOver, event.source);
-    }
+      if (this.lastOver === event.over) {
+        this.lastOver = null;
+      } else {
+        this.lastOver = event.over;
+      }
 
-    if (this.lastOver === event.over) {
-      this.lastOver = null;
+      swap(event.source, event.over);
     } else {
+      // Keep the over element for later swap
       this.lastOver = event.over;
     }
-
-    swap(event.source, event.over);
 
     const swappableSwappedEvent = new SwappableSwappedEvent({
       dragEvent: event,
@@ -141,6 +151,9 @@ export default class Swappable extends Draggable {
    * @param {DragStopEvent} event - Drag stop event
    */
   [onDragStop](event) {
+    if (this.options.immediateSwap !== true) {
+      swap(event.source, this.lastOver);
+    }
     const swappableStopEvent = new SwappableStopEvent({
       dragEvent: event,
     });
