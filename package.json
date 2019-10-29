@@ -1,6 +1,6 @@
 {
   "name": "@shopify/draggable",
-  "version": "1.0.0-beta.8",
+  "version": "1.0.0-beta.9",
   "private": false,
   "license": "MIT",
   "description": "The JavaScript Drag & Drop library your grandparents warned you about.",
@@ -27,6 +27,7 @@
     "es6"
   ],
   "main": "./lib/draggable.bundle.js",
+  "types": "./index.d.ts",
   "scripts": {
     "start": "concurrently \"yarn watch\" \"cd examples && yarn && yarn start\"",
     "build": "yarn build:production",
@@ -40,6 +41,10 @@
     "build:development": "node scripts/build.js",
     "build:production": "node scripts/build.js --production"
   },
+  "files": [
+    "lib/**/*.js",
+    "index.d.ts"
+  ],
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-jest": "^23.0.1",
