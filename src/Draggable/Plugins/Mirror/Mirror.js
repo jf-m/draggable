@@ -429,6 +429,7 @@ function resetMirror({mirror, source, options, ...args}) {
     mirror.style.top = 0;
     mirror.style.left = 0;
     mirror.style.margin = 0;
+    mirror.style.opacity = 1;
 
     if (options.constrainDimensions) {
       mirror.style.height = offsetHeight;

@@ -109,8 +109,8 @@ function decorateElement(element) {
   const hasMissingTabIndex = Boolean(!element.getAttribute('tabindex') && element.tabIndex === -1);
 
   if (hasMissingTabIndex) {
-    elementsWithMissingTabIndex.push(element);
-    element.tabIndex = 0;
+    // elementsWithMissingTabIndex.push(element);
+    // element.tabIndex = 0;
   }
 }
 
@@ -123,7 +123,7 @@ function stripElement(element) {
   const tabIndexElementPosition = elementsWithMissingTabIndex.indexOf(element);
 
   if (tabIndexElementPosition !== -1) {
-    element.tabIndex = -1;
-    elementsWithMissingTabIndex.splice(tabIndexElementPosition, 1);
+    // element.tabIndex = -1;
+    // elementsWithMissingTabIndex.splice(tabIndexElementPosition, 1);
   }
 }

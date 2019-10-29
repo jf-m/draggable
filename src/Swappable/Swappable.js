@@ -3,6 +3,7 @@ import {SwappableStartEvent, SwappableSwapEvent, SwappableSwappedEvent, Swappabl
 
 const onDragStart = Symbol('onDragStart');
 const onDragOver = Symbol('onDragOver');
+const onDragOut = Symbol('onDragOut');
 const onDragStop = Symbol('onDragStop');
 
 /**
@@ -60,14 +61,23 @@ export default class Swappable extends Draggable {
      * @type {HTMLElement}
      */
     this.lastOver = null;
+    /**
+     * Last draggable element Container that was dragged over
+     * @property lastOverContainer
+     * @type {HTMLElement}
+     */
+    this.lastOverContainer = null;
 
     this[onDragStart] = this[onDragStart].bind(this);
     this[onDragOver] = this[onDragOver].bind(this);
+    this[onDragOut] = this[onDragOut].bind(this);
     this[onDragStop] = this[onDragStop].bind(this);
 
     this.on('drag:start', this[onDragStart])
       .on('drag:over', this[onDragOver])
+      .on('drag:out', this[onDragOut])
       .on('drag:stop', this[onDragStop]);
+
   }
 
   /**
@@ -75,9 +85,9 @@ export default class Swappable extends Draggable {
    */
   destroy() {
     super.destroy();
-
     this.off('drag:start', this._onDragStart)
       .off('drag:over', this._onDragOver)
+      .off('drag:out', this._onDragOut)
       .off('drag:stop', this._onDragStop);
   }
 
@@ -92,6 +102,7 @@ export default class Swappable extends Draggable {
     });
 
     this.trigger(swappableStartEvent);
+    event.source.style.opacity = 0;
 
     if (swappableStartEvent.canceled()) {
       event.cancel();
@@ -104,45 +115,18 @@ export default class Swappable extends Draggable {
    * @param {DragOverEvent} event - Drag over event
    */
   [onDragOver](event) {
-    if (event.over === event.originalSource || event.over === event.source || event.canceled()) {
-      return;
-    }
+    this.lastOver = event.over;
+    this.lastOverContainer = event.overContainer;
+  }
 
-    const swappableSwapEvent = new SwappableSwapEvent({
-      dragEvent: event,
-      over: event.over,
-      overContainer: event.overContainer,
-    });
-
-    this.trigger(swappableSwapEvent);
-
-    if (swappableSwapEvent.canceled()) {
-      return;
-    }
-    if (this.options.immediateSwap === true) {
-      // swap originally swapped element back
-      if (this.lastOver && this.lastOver !== event.over) {
-        swap(this.lastOver, event.source);
-      }
-
-      if (this.lastOver === event.over) {
-        this.lastOver = null;
-      } else {
-        this.lastOver = event.over;
-      }
-
-      swap(event.source, event.over);
-    } else {
-      // Keep the over element for later swap
-      this.lastOver = event.over;
-    }
-
-    const swappableSwappedEvent = new SwappableSwappedEvent({
-      dragEvent: event,
-      swappedElement: event.over,
-    });
-
-    this.trigger(swappableSwappedEvent);
+  /**
+   * Drag out handler
+   * @private
+   * @param {DragOutEvent} event - Drag over event
+   */
+  [onDragOut](event) {
+    this.lastOver = null;
+    this.lastOverContainer = null;
   }
 
   /**
@@ -151,15 +135,36 @@ export default class Swappable extends Draggable {
    * @param {DragStopEvent} event - Drag stop event
    */
   [onDragStop](event) {
-    if (this.options.immediateSwap !== true) {
-      swap(event.source, this.lastOver);
-    }
-    const swappableStopEvent = new SwappableStopEvent({
+    const swappableSwapEvent = new SwappableSwapEvent({
       dragEvent: event,
+      over: this.lastOver,
+      overContainer: this.lastOverContainer
+    });
+
+    this.trigger(swappableSwapEvent);
+
+    if (swappableSwapEvent.canceled()) {
+      return;
+    }
+
+    event.source.style.display = null;
+    if (this.lastOver != null) {
+     // swap(event.source, this.lastOver);
+    }
+    let swappableStopEvent = new SwappableSwappedEvent({
+      dragEvent: event,
+      swappedElement: this.lastOver
+    });
+
+    this.trigger(swappableStopEvent);
+
+    swappableStopEvent = new SwappableStopEvent({
+      dragEvent: event
     });
 
     this.trigger(swappableStopEvent);
     this.lastOver = null;
+    this.lastOverContainer = null;
   }
 }
 

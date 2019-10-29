@@ -34,7 +34,7 @@ export default function closest(element, value) {
     } else if (isSelector) {
       return matchFunction.call(currentElement, selector);
     } else if (isNodeList) {
-      return [...nodeList].includes(currentElement);
+      return Array.prototype.slice.call(nodeList).includes(currentElement);
     } else if (isElement) {
       return singleElement === currentElement;
     } else if (isFunction) {

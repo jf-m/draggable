@@ -334,7 +334,7 @@ export default class Draggable {
    * @return {HTMLElement[]}
    */
   getDraggableElementsForContainer(container) {
-    const allDraggableElements = container.querySelectorAll(this.options.draggable);
+    const allDraggableElements = Array.prototype.slice.call(container.querySelectorAll(this.options.draggable));
 
     return [...allDraggableElements].filter((childElement) => {
       return childElement !== this.originalSource && childElement !== this.mirror;
